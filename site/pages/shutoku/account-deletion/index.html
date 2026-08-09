@@ -26,6 +26,16 @@
 
   The authored file carries its own <style> block. It cannot come across —
   style-src is 'self'. The site's own document furniture is used instead.
+
+  The email_off comment wrappers below are not decoration. Cloudflare's Email
+  Address Obfuscation rewrites every mailto: at the edge into a
+  /cdn-cgi/l/email-protection link, swaps the visible address for "[email
+  protected]",
+  then relies on a script to put it back. That script is blocked by
+  script-src 'none', so the link 404s and the address is unreadable — which on
+  this page means the Play-required deletion route does not work. The wrappers
+  are Cloudflare's documented opt-out. Turning the feature off in Scrape Shield
+  fixes it site-wide and makes these harmless no-ops; until then they stay.
 -->
 <html lang="en">
 <head>
@@ -71,8 +81,8 @@
       <div class="notice">
         <h2>2 · By email — within 30 days</h2>
         <p>If you no longer have the app installed, or cannot sign in, write to us from the email address your account uses and ask for it to be deleted.</p>
-        <p><a class="store" href="mailto:shutoku@systemsatlasproject.com?subject=Delete%20my%20Shutoku%20account&amp;body=Please%20delete%20my%20Shutoku%20account%20and%20all%20data%20associated%20with%20it.%0A%0AI%20am%20writing%20from%20the%20email%20address%20my%20account%20uses.">Email a deletion request</a></p>
-        <p>Or write to <a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a>. Requests are actioned within 30 days. We ask you to write from the account's own address so that nobody can delete someone else's account.</p>
+        <p><!--email_off--><a class="store" href="mailto:shutoku@systemsatlasproject.com?subject=Delete%20my%20Shutoku%20account&amp;body=Please%20delete%20my%20Shutoku%20account%20and%20all%20data%20associated%20with%20it.%0A%0AI%20am%20writing%20from%20the%20email%20address%20my%20account%20uses.">Email a deletion request</a><!--/email_off--></p>
+        <p>Or write to <!--email_off--><a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a><!--/email_off-->. Requests are actioned within 30 days. We ask you to write from the account's own address so that nobody can delete someone else's account.</p>
       </div>
 
       <h2>What is deleted</h2>
@@ -102,7 +112,7 @@
       </ul>
 
       <h2>Contact</h2>
-      <p>Systems Atlas Project Limited · <a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a> · <a href="/shutoku/privacy/">Privacy policy</a></p>
+      <p>Systems Atlas Project Limited · <!--email_off--><a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a><!--/email_off--> · <a href="/shutoku/privacy/">Privacy policy</a></p>
 
     </div>
   </div>

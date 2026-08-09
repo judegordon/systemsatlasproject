@@ -19,6 +19,12 @@
   The authored file carries its own <style> block. It cannot come across —
   style-src is 'self' and an inline style would be dropped, leaving the page
   unstyled. The structure below is the site's own document furniture instead.
+
+  The email_off comment wrapper below is Cloudflare's documented opt-out from
+  Email Address Obfuscation, which rewrites a mailto: into a
+  /cdn-cgi/l/email-protection link that only a script can decode. script-src is
+  'none', so without the wrapper that link 404s and the address on the page
+  reads "[email protected]".
 -->
 <html lang="en">
 <head>
@@ -128,7 +134,7 @@
 
       <h2>Contact</h2>
       <p>Systems Atlas Project Limited<br>
-      <a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a></p>
+      <!--email_off--><a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a><!--/email_off--></p>
 
       <p>Shutoku is published by Systems Atlas Project Limited. <a href="/shutoku/account-deletion/">Delete your account</a>.</p>
 
