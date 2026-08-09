@@ -1092,6 +1092,14 @@ a.tool:hover .tool__link { color: var(--night); text-decoration: underline; text
 
 .notice p:last-child { margin-bottom: 0; }
 
+/* A notice may open with its own heading. The section rhythm on `.doc h2`
+   would otherwise push it away from the border it is sitting inside. */
+.doc .notice > :first-child { margin-top: 0; }
+
+/* `.doc a` underlines every link, which is right for prose and wrong for the
+   one that is a button. Restated because `.doc a` outranks `.store`. */
+.doc .store { text-decoration: none; }
+
 /* FAQ --------------------------------------------------------------------- */
 
 .faq { margin-top: var(--s5); border-top: 1px solid rgba(16, 24, 32, 0.16); }

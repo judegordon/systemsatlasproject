@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--
+  Shutoku — account deletion.
+
+  The copy is authored in the shutoku repo, at
+  store-assets/site-pages/account-deletion.html, and PUBLISHED from here.
+  Change it there first and bring it across.
+
+  This page exists to satisfy a Play REQUIREMENT with three specific criteria
+  (Play Console Help 13327111). All three are met deliberately, so do not
+  "tidy" them away:
+    1. the link must be FUNCTIONAL — it is entered in the Data safety form,
+       which is why this page lives at /shutoku/account-deletion/ and why that
+       URL must not move;
+    2. the deletion pathway must be PROMINENT and easily discoverable ON THIS
+       PAGE — hence the two routes directly under the heading, above any
+       explanation;
+    3. the page must REFERENCE THE APP OR DEVELOPER NAME as it appears on the
+       store listing — hence "Shutoku" and "Systems Atlas Project Limited"
+       verbatim in the first line.
+
+  The email route is what lets this satisfy the requirement without building a
+  web service: Google accepts a link, an address, or a form. That means someone
+  must actually action requests arriving at the address below within the stated
+  window — the 30 days here is a commitment, not filler.
+
+  The authored file carries its own <style> block. It cannot come across —
+  style-src is 'self'. The site's own document furniture is used instead.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delete your Shutoku account — Shutoku</title>
+<meta name="description" content="How to delete your Shutoku account and everything stored with it — in the app, or by email.">
+<meta name="theme-color" content="#101820">
+<link rel="canonical" href="https://systemsatlasproject.com/shutoku/account-deletion/">
+<link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Delete your Shutoku account — Shutoku">
+<meta property="og:description" content="How to delete your Shutoku account and everything stored with it — in the app, or by email.">
+<meta property="og:url" content="https://systemsatlasproject.com/shutoku/account-deletion/">
+<meta property="og:image" content="https://systemsatlasproject.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body class="t-shutoku">
+
+<!--#include masthead-->
+
+<main id="main" class="field--paper doc">
+  <div class="wrap">
+    <div class="doc__inner">
+
+      <p class="eyebrow"><span class="eyebrow__no">習得 · SHUTOKU</span> Account deletion</p>
+      <h1>Delete your Shutoku account</h1>
+
+      <p><strong>Shutoku</strong> is published by <strong>Systems Atlas Project Limited</strong>. You can delete your Shutoku account, and all the data associated with it, in either of the two ways below.</p>
+
+      <div class="notice">
+        <h2>1 · In the app — immediate</h2>
+        <ol>
+          <li>Open Shutoku and make sure you are signed in.</li>
+          <li>Go to <strong>Settings → Account</strong>.</li>
+          <li>Tap <strong>Delete account</strong> and confirm with your password.</li>
+        </ol>
+        <p>Your account, your progress on our servers, and the app's data on that device are all erased straight away.</p>
+      </div>
+
+      <div class="notice">
+        <h2>2 · By email — within 30 days</h2>
+        <p>If you no longer have the app installed, or cannot sign in, write to us from the email address your account uses and ask for it to be deleted.</p>
+        <p><a class="store" href="mailto:shutoku@systemsatlasproject.com?subject=Delete%20my%20Shutoku%20account&amp;body=Please%20delete%20my%20Shutoku%20account%20and%20all%20data%20associated%20with%20it.%0A%0AI%20am%20writing%20from%20the%20email%20address%20my%20account%20uses.">Email a deletion request</a></p>
+        <p>Or write to <a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a>. Requests are actioned within 30 days. We ask you to write from the account's own address so that nobody can delete someone else's account.</p>
+      </div>
+
+      <h2>What is deleted</h2>
+      <ul>
+        <li>Your account and your email address.</li>
+        <li>Your review progress for every card — repetitions, intervals, ease factors and due dates.</li>
+        <li>Your streak history and your best conjugation-practice streak.</li>
+        <li>Any password-reset links outstanding on the account.</li>
+        <li>The app's copy of all of the above on the device you delete from.</li>
+      </ul>
+      <div class="notice">
+        <p><strong>Deletion is immediate and permanent. It cannot be undone.</strong></p>
+      </div>
+
+      <h2>What is not deleted</h2>
+      <p>Two things survive, and we would rather tell you than let you assume otherwise.</p>
+      <ul>
+        <li><strong>Feedback and reports you have already sent.</strong> Those were emailed to us when you sent them and remain in our inbox. They are not linked to your account. Ask us and we will delete them too.</li>
+        <li><strong>Translation-practice text already sent to OpenAI.</strong> If you used translation practice, that text was processed by OpenAI and is retained under their terms, which we do not control. It was never sent with your email address or account identifier.</li>
+      </ul>
+
+      <h2>Things worth knowing</h2>
+      <ul>
+        <li><strong>Deleting the app does not delete your account.</strong> Use one of the two routes above.</li>
+        <li><strong>Signing out is not deletion.</strong> Signing out erases the app's data from that device but keeps your account, so you can sign back in on any device. Shutoku offers to upload your progress before signing out.</li>
+        <li><strong>If you want a copy first</strong>, email us before deleting and we will send you what your account holds.</li>
+      </ul>
+
+      <h2>Contact</h2>
+      <p>Systems Atlas Project Limited · <a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a> · <a href="/shutoku/privacy/">Privacy policy</a></p>
+
+    </div>
+  </div>
+</main>
+
+<!--#include footer-tool name="Shutoku" slug="shutoku"-->
+
+</body>
+</html>
