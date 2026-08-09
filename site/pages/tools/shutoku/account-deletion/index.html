@@ -9,15 +9,18 @@
   This page exists to satisfy a Play REQUIREMENT with three specific criteria
   (Play Console Help 13327111). All three are met deliberately, so do not
   "tidy" them away:
-    1. the link must be FUNCTIONAL — it is entered in the Data safety form,
-       which is why this page lives at /shutoku/account-deletion/ and why that
-       URL must not move;
+    1. the link must be FUNCTIONAL — it is entered in the Data safety form;
     2. the deletion pathway must be PROMINENT and easily discoverable ON THIS
        PAGE — hence the two routes directly under the heading, above any
        explanation;
     3. the page must REFERENCE THE APP OR DEVELOPER NAME as it appears on the
        store listing — hence "Shutoku" and "Systems Atlas Project Limited"
        verbatim in the first line.
+
+  The authored file names /shutoku/account-deletion as the target URL and the
+  Data safety form may already hold it. That path now 301s here — see
+  site/_redirects. If the form is updated to point straight at this URL, the
+  redirect can go; until then it is what keeps criterion 1 true.
 
   The email route is what lets this satisfy the requirement without building a
   web service: Google accepts a link, an address, or a form. That means someone
@@ -30,8 +33,7 @@
   The email_off comment wrappers below are not decoration. Cloudflare's Email
   Address Obfuscation rewrites every mailto: at the edge into a
   /cdn-cgi/l/email-protection link, swaps the visible address for "[email
-  protected]",
-  then relies on a script to put it back. That script is blocked by
+  protected]", and injects a script to undo both. That script is blocked by
   script-src 'none', so the link 404s and the address is unreadable — which on
   this page means the Play-required deletion route does not work. The wrappers
   are Cloudflare's documented opt-out. Turning the feature off in Scrape Shield
@@ -44,13 +46,13 @@
 <title>Delete your Shutoku account — Shutoku</title>
 <meta name="description" content="How to delete your Shutoku account and everything stored with it — in the app, or by email.">
 <meta name="theme-color" content="#101820">
-<link rel="canonical" href="https://systemsatlasproject.com/shutoku/account-deletion/">
+<link rel="canonical" href="https://systemsatlasproject.com/tools/shutoku/account-deletion/">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Delete your Shutoku account — Shutoku">
 <meta property="og:description" content="How to delete your Shutoku account and everything stored with it — in the app, or by email.">
-<meta property="og:url" content="https://systemsatlasproject.com/shutoku/account-deletion/">
+<meta property="og:url" content="https://systemsatlasproject.com/tools/shutoku/account-deletion/">
 <meta property="og:image" content="https://systemsatlasproject.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
@@ -63,7 +65,7 @@
   <div class="wrap">
     <div class="doc__inner">
 
-      <p class="eyebrow"><span class="eyebrow__no">習得 · SHUTOKU</span> Account deletion</p>
+      <p class="eyebrow"><span class="eyebrow__no">SHUTOKU</span> Account deletion</p>
       <h1>Delete your Shutoku account</h1>
 
       <p><strong>Shutoku</strong> is published by <strong>Systems Atlas Project Limited</strong>. You can delete your Shutoku account, and all the data associated with it, in either of the two ways below.</p>
@@ -112,7 +114,7 @@
       </ul>
 
       <h2>Contact</h2>
-      <p>Systems Atlas Project Limited · <!--email_off--><a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a><!--/email_off--> · <a href="/shutoku/privacy/">Privacy policy</a></p>
+      <p>Systems Atlas Project Limited · <!--email_off--><a href="mailto:shutoku@systemsatlasproject.com">shutoku@systemsatlasproject.com</a><!--/email_off--> · <a href="/tools/shutoku/privacy/">Privacy policy</a></p>
 
     </div>
   </div>

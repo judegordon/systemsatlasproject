@@ -70,7 +70,7 @@ mkdirSync(DIST, { recursive: true });
 
 // --- static files ----------------------------------------------------------
 
-for (const f of ["styles.css", "_headers", "robots.txt"]) {
+for (const f of ["styles.css", "_headers", "_redirects", "robots.txt"]) {
   const src = join(SITE, f);
   if (existsSync(src)) cpSync(src, join(DIST, f));
 }

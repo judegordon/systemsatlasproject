@@ -1,0 +1,15 @@
+# Cloudflare Pages redirects. Copied to dist/ verbatim by scripts/build.mjs.
+#
+# A redirect here is not a second copy of a page. It is the opposite: it exists
+# so that a URL published somewhere this repo cannot reach keeps resolving to
+# the one page that does exist. Anything that would need its own content is a
+# page under site/pages/, not a line in this file.
+
+# Shutoku's legal pages were briefly published at the top level, and
+# /shutoku/account-deletion is the URL named in the app's Play Data safety
+# form. The pages live under /tools/shutoku/ with the rest of the tool, so
+# these two paths point at them rather than duplicating them. Update the Play
+# form to the /tools/shutoku/ URL and these can be deleted.
+/shutoku/privacy           /tools/shutoku/privacy/           301
+/shutoku/account-deletion  /tools/shutoku/account-deletion/  301
+/shutoku/*                 /tools/shutoku/:splat             301
