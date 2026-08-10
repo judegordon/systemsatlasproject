@@ -21,17 +21,17 @@
 
       <p class="eyebrow"><span class="eyebrow__no">KONKI</span> Privacy policy</p>
       <h1>What Konki collects, and what it does not.</h1>
-      <p class="doc__updated">Last updated 25 July 2026</p>
+      <p class="doc__updated">Last updated 10 August 2026</p>
 
       <p>Konki is built by Systems Atlas Project. This policy explains what data is collected, how it is used, and your rights over it.</p>
-      <p><strong>Konki works fully without an account. Everything below applies only if you choose to create one.</strong></p>
+      <p><strong>Konki requires an account.</strong> Signing in is what lets your training sync between your devices, and signing out removes it from the device — your account is where your data lives.</p>
 
       <h2>What is collected</h2>
       <p>When you create an account:</p>
       <ul>
         <li>Your email address</li>
         <li>A hashed version of your password — the password itself is never stored</li>
-        <li>Your training data: workout logs, exercise plans, set and rep records</li>
+        <li>Your training data: workout logs, exercise plans, templates, set and rep records, body-weight entries and goals</li>
       </ul>
 
       <p>If you use Konki's social features, also:</p>
@@ -40,6 +40,7 @@
         <li><strong>Your connections</strong> — who you have added as a friend or coach, and who has added you.</li>
         <li><strong>Messages</strong> you send to and receive from your connections, stored as written.</li>
         <li><strong>Templates and programmes you share</strong>, including anything you have written in them.</li>
+        <li><strong>Groups</strong> — the groups you belong to, posts you make on their boards, and, for private groups, the invite code used to request entry.</li>
         <li><strong>Blocks</strong> — a record of accounts you have blocked.</li>
         <li><strong>Reports</strong> you file, including a copy of the content you reported, taken at the moment you report it.</li>
         <li><strong>Log sharing consent</strong> — a record of which coaches you have chosen to share your training log with.</li>
@@ -52,16 +53,16 @@
       <ul>
         <li>To authenticate you and maintain your account</li>
         <li>To sync your training data across your devices</li>
-        <li>To deliver messages and shared templates between you and your connections</li>
+        <li>To deliver messages, shared templates and group posts between you and other users</li>
         <li>To operate blocking, so a blocked account can no longer find or contact you</li>
         <li>To review reports and act on accounts that break the rules</li>
-        <li>To send password reset emails when you request them</li>
+        <li>To send a password reset code when you request one</li>
       </ul>
       <p>Your data is not sold, not shared with third parties, and not used for advertising.</p>
 
       <h2>What other people can see</h2>
       <p>Your training data is private. Nobody else can see your logs, plans or body metrics unless you deliberately share a template or programme with them.</p>
-      <p>Other Konki users can see your username if you have set one, messages you send them, and templates and programmes you share with them. If you connect a coach, they can see the templates and programmes you share and the sessions logged against them.</p>
+      <p>Other Konki users can see your username if you have set one, messages you send them, templates and programmes you share with them, and posts you make on the boards of groups you both belong to. If you connect a coach, they can see the templates and programmes you share and the sessions logged against them.</p>
 
       <div class="notice">
         <p><strong>Sharing your training log is separate, and off unless you turn it on.</strong></p>
@@ -70,23 +71,23 @@
       </div>
 
       <h2>Blocking and reports</h2>
-      <p>Blocking is silent. The blocked account is not told. From their side you stop appearing in search, they cannot message you, and your connection ends.</p>
-      <p>When you report someone, the report and a copy of the reported content are stored. This is because reported content can be deleted or changed before anyone reads the report, and without a copy there may be nothing left to review.</p>
+      <p>Blocking is silent. The blocked account is not told. From their side you stop appearing in search, they cannot message you, your posts and membership disappear from group boards you share, and your connection ends.</p>
+      <p>When you report someone — a person, a message, a shared template, a group or a post on its board — the report and a copy of the reported content are stored. This is because reported content can be deleted or changed before anyone reads the report, and without a copy there may be nothing left to review.</p>
       <p>A person reads every report within 24 hours. Accounts that break the rules in the <a href="/tools/konki/terms/">Terms of Use</a> are removed.</p>
       <p>Reports are not anonymous to me — I can see who filed them. They are never shown to the person reported.</p>
 
       <h2>Where your data is stored</h2>
-      <p>On servers hosted by Railway in the European Union. Passwords are hashed with bcrypt before storage. Authentication tokens are signed as JSON Web Tokens.</p>
+      <p>On servers hosted by Railway in the European Union. Passwords are hashed with bcrypt before storage. Authentication tokens are signed as JSON Web Tokens, and a token stops working the moment its account is deleted.</p>
 
       <h2>Email</h2>
-      <p>Resend is used to send transactional email — specifically password resets. There are no marketing emails and no mailing list. Your email address is not shared with Resend beyond what is necessary to deliver those messages.</p>
+      <p>Resend is used to send transactional email — specifically the six-digit password reset code, which expires after 15 minutes. There are no marketing emails and no mailing list. Your email address is not shared with Resend beyond what is necessary to deliver those messages.</p>
 
       <h2>This website</h2>
       <p>This site sets no cookies and runs no analytics. It is served by Cloudflare, which processes standard request information such as IP address in order to deliver the page and protect against abuse.</p>
 
       <h2>Data retention and deletion</h2>
       <p>Your data is retained for as long as your account exists.</p>
-      <p>You can delete your account from inside the app: <strong>Account → Delete Account</strong>. This permanently removes your account, your training data, your connections, and your block list. You can also request deletion by email.</p>
+      <p>You can delete your account from inside the app: <strong>Account → Delete Account</strong>. This permanently removes your account, your training data, your connections, your group memberships and posts, and your block list from the server, and wipes the data from your device. You can also request deletion by email — the <a href="/tools/konki/delete-account/">delete your account</a> page walks through both routes.</p>
       <p>Two things survive that deletion, and it is worth being straight about them:</p>
       <ul>
         <li><strong>Messages you sent to other people remain in their conversations.</strong> Your side of someone else's chat history cannot be removed without deleting theirs too.</li>
