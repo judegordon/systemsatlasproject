@@ -35,7 +35,7 @@ These are not preferences. Breaking any of them breaks the site.
 
 A division of a system has to survive six rules:
 
-1. **Five parts, at most seven.** From Miller (1956), set at the cautious end.
+1. **At most seven parts.** From Miller (1956).
 2. **Mutually exclusive.** No shared elements; nothing derivable from siblings.
 3. **Collectively exhaustive**, within that cognitive bound.
 4. **Equal abstraction.** Components at one level answer the same question type.

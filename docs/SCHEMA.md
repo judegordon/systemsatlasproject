@@ -141,7 +141,7 @@ not exist fails the build.
 
 Run `node scripts/validate.mjs`. It checks the method against itself:
 
-1. **Miller's bound.** More than 7 children is an error. More than 5 is a warning.
+1. **Miller's bound.** More than 7 children is an error.
 2. **Decomposable or terminal.** Exactly one child is an error. No children and
    no `terminal: true` is a warning.
 3. **Unique ids** across the whole atlas.

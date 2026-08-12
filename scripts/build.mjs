@@ -408,16 +408,13 @@ function checkRules(node) {
   const rules = [];
 
   if (n === 0) {
-    rules.push(["01", "Five parts, at most seven", "na",
+    rules.push(["01", "At most seven", "na",
       "Not applicable. This node is not a division."]);
   } else if (n > 7) {
-    rules.push(["01", "Five parts, at most seven", "fail",
+    rules.push(["01", "At most seven", "fail",
       `Divides into ${n} components, above the stated ceiling of seven.`]);
-  } else if (n > 5) {
-    rules.push(["01", "Five parts, at most seven", "warning",
-      `Divides into ${n} components, above the target of five and within the ceiling of seven.`]);
   } else {
-    rules.push(["01", "Five parts, at most seven", "pass",
+    rules.push(["01", "At most seven", "pass",
       `Divides into ${n} component${n === 1 ? "" : "s"}.`]);
   }
 
@@ -510,7 +507,7 @@ function renderBreadcrumb(trail) {
 // divides is a <summary> that opens; the link to its own page sits inside,
 // separate from the toggle, because one control doing two things with no
 // JavaScript to disambiguate them is a control that does neither reliably.
-function renderTree(root, sectionNo, count) {
+function renderTree(root, count) {
   const leaf = (node, path, depth) =>
     `<li class="twig">` +
     `<a class="twig__link" href="/atlas/${path}/">` +
@@ -542,7 +539,7 @@ function renderTree(root, sectionNo, count) {
   <!-- The whole domain ===================================================== -->
   <section class="field--night band">
     <div class="wrap">
-      <p class="eyebrow"><span class="eyebrow__no">§ ${sectionNo}</span> The whole domain</p>
+      <p class="eyebrow">The whole domain</p>
       <h2 class="section-title">${count} nodes, every level of the descent.</h2>
       <div class="prose">
         <p>
@@ -568,9 +565,9 @@ function renderTree(root, sectionNo, count) {
 //
 // Pending proposals are never here. §7 says so, and a pending proposal is an
 // argument nobody has answered yet.
-function renderProposals(entries, path, sectionNo) {
+function renderProposals(entries, path) {
   const RULE_NAMES = {
-    "01": "Five parts, at most seven", "02": "Mutually exclusive",
+    "01": "At most seven", "02": "Mutually exclusive",
     "03": "Collectively exhaustive", "04": "Equal abstraction",
     "05": "Decomposable or terminal", "06": "Justified in writing",
   };
@@ -645,7 +642,7 @@ ${sources}            <p class="proposal__label">Decision</p>
   <section class="field--paper band">
     <div class="wrap">
       <div class="reading">
-        <p class="eyebrow"><span class="eyebrow__no">§ ${sectionNo}</span> Proposals</p>
+        <p class="eyebrow">Proposals</p>
         <h2 class="section-title">What has been argued about this node.</h2>
         <div class="prose">
           <p>${lead}</p>
@@ -669,7 +666,7 @@ ${body}
 //
 // Nothing here is fetched at runtime. A node page with forty comments is still
 // a plain HTML file that runs no script.
-function renderDiscussion(tops, path, sectionNo) {
+function renderDiscussion(tops, path) {
   const total = tops.reduce((n, t) => n + 1 + t.replies.length, 0);
 
   const comment = (c, isReply) => `        <article class="comment${
@@ -695,7 +692,7 @@ function renderDiscussion(tops, path, sectionNo) {
   <section class="field--night band">
     <div class="wrap">
       <div class="reading">
-        <p class="eyebrow"><span class="eyebrow__no">§ ${sectionNo}</span> Discussion</p>
+        <p class="eyebrow">Discussion</p>
         <h2 class="section-title">What has been said about this node.</h2>
         <div class="prose">
           <p>${lead}</p>
@@ -715,7 +712,7 @@ ${body}
 // The entries that point at this node. Absent when there are none — a node
 // with no diagnostics has not been stress-tested, and an empty section
 // announcing that would read as a clean bill of health.
-function renderNodeDiagnostics(entries, sectionNo) {
+function renderNodeDiagnostics(entries) {
   if (!entries.length) return "";
 
   const cards = entries.map((e) => `          <a class="kid" href="/diagnostics/${e.slug}/">
@@ -732,7 +729,7 @@ function renderNodeDiagnostics(entries, sectionNo) {
   <!-- Diagnostics ========================================================== -->
   <section class="field--night band">
     <div class="wrap">
-      <p class="eyebrow"><span class="eyebrow__no">§ ${sectionNo}</span> Diagnostics</p>
+      <p class="eyebrow">Diagnostics</p>
       <h2 class="section-title">${entries.length} entr${entries.length === 1 ? "y" : "ies"} against this node.</h2>
       <div class="prose">
         <p>
@@ -749,7 +746,7 @@ ${cards}
 `;
 }
 
-function renderChildren(node, path, depth, sectionNo) {
+function renderChildren(node, path, depth) {
   const kids = node.children ?? [];
   if (!kids.length) return "";
 
@@ -770,7 +767,7 @@ function renderChildren(node, path, depth, sectionNo) {
   <!-- Divides into ========================================================= -->
   <section class="field--night band">
     <div class="wrap">
-      <p class="eyebrow"><span class="eyebrow__no">§ ${sectionNo}</span> Divides into</p>
+      <p class="eyebrow">Divides into</p>
       <h2 class="section-title">${kids.length} component${kids.length === 1 ? "" : "s"} at level ${depth + 1}.</h2>
       <div class="kids">
 ${cards}
@@ -799,7 +796,7 @@ const domainStats = new Map(domains.map((d) => [d.id, measure(d)]));
 
 // --- homepage figures ------------------------------------------------------
 //
-// The domain ladder in § 03 was hand-written and had already drifted: it
+// The domain ladder on the homepage was hand-written and had already drifted: it
 // showed human biological at L7 when the deepest node in it is L6. It is
 // measured now, so it cannot say anything the atlas does not.
 
@@ -953,13 +950,6 @@ for (const [path, { node, depth, trail }] of nodes) {
     ? `${node.name} — a level ${depth} node in the Systems Atlas taxonomy. No definition has been written yet.`
     : String(node.definition).trim().replace(/\s+/g, " ").slice(0, 180);
 
-  // Sections are numbered in the order they appear, and which ones appear
-  // depends on the node: a leaf has no "Divides into", and only a domain root
-  // carries the whole-domain tree.
-  let section = 1;
-  const nextNo = () => String(++section).padStart(2, "0");
-  const childrenNo = kids.length ? nextNo() : null;
-  const treeNo = depth === 0 && kids.length ? nextNo() : null;
   const entries = byNode.get(path) ?? [];
 
   const html = expand(fill(nodeShell, {
@@ -970,13 +960,12 @@ for (const [path, { node, depth, trail }] of nodes) {
     level: String(depth),
     breadcrumb: renderBreadcrumb(trail),
     fields: FIELDS.map((f) => renderField(node, f)).join("\n"),
-    children: renderChildren(node, path, depth, childrenNo),
-    tree: treeNo ? renderTree(node, treeNo, domainStats.get(node.id).count) : "",
-    rulesNo: nextNo(),
+    children: renderChildren(node, path, depth),
+    tree: depth === 0 && kids.length ? renderTree(node, domainStats.get(node.id).count) : "",
     checks: renderChecks(node),
-    diagnostics: renderNodeDiagnostics(entries, entries.length ? nextNo() : null),
-    proposals: renderProposals(proposalsByNode.get(path) ?? [], path, nextNo()),
-    discussion: renderDiscussion(commentsByNode.get(path) ?? [], path, nextNo()),
+    diagnostics: renderNodeDiagnostics(entries),
+    proposals: renderProposals(proposalsByNode.get(path) ?? [], path),
+    discussion: renderDiscussion(commentsByNode.get(path) ?? [], path),
   }), `atlas/${path}`);
 
   const out = join(DIST, "atlas", ...path.split("/"), "index.html");

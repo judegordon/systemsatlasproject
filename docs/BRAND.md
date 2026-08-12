@@ -25,7 +25,7 @@ Konki, Shutoku, Bottou and Kantetsu are independent tools precipitated from part
 
 ### Recommended primary line
 
-> A map of how systems work.
+> A map of systems.
 
 This describes the destination without pretending the map is already complete.
 
@@ -246,11 +246,10 @@ The home page must establish the atlas before introducing the apps.
 - Method
 - Tools
 - Diagnostics
-- About
 
 ### 2. Hero
 
-**Headline:** A map of how systems work.
+**Headline:** A map of systems.
 
 Use a live or gently animated structural fragment rather than a decorative hero image. The graphic should show at least one boundary, relation and selected node.
 

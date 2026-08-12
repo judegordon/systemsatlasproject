@@ -121,15 +121,13 @@ a full replacement structure. Put it first in the form.
 
 For `subdivide`, `payload` carries the proposed children, each with the same
 six fields a node carries. The form renders one block per child and enforces
-the bound client-side: adding an eighth child is refused with the reason,
-adding a sixth warns.
+the bound client-side: adding an eighth child is refused with the reason.
 
 ### Client-side checks before submission
 
 These are not security, they are teaching:
 
 - More than 7 components — refused, with Rule 01 quoted
-- More than 5 — warned
 - Exactly 1 component — refused, Rule 05
 - Any child missing a definition — warned
 - No sources anywhere — warned, with the line from CONTRIBUTING about a

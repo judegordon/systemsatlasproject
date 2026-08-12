@@ -16,7 +16,6 @@ const ATLAS = "atlas";
 const DIAGNOSTICS = "diagnostics";
 const LENSES = "lenses/lenses.yaml";
 
-const MILLER_TARGET = 5;   // stated default
 const MILLER_MAX = 7;      // stated ceiling
 
 const REQUIRED_KEYS = [
@@ -100,8 +99,6 @@ for (const { file, root } of domains) {
     // Rule: Miller's bound
     if (kids.length > MILLER_MAX)
       err(where, `divides into ${kids.length} components, above the stated ceiling of ${MILLER_MAX}.`);
-    else if (kids.length > MILLER_TARGET)
-      warn(where, `divides into ${kids.length} components, above the stated target of ${MILLER_TARGET} but within the ceiling of ${MILLER_MAX}.`);
   });
 }
 
