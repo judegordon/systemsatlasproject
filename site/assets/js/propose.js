@@ -54,7 +54,6 @@ let formToken = null;
 // changing your mind and changing it back.
 
 const CHILDREN_MAX = 7;   // Rule 01, the ceiling
-const CHILDREN_WARN = 5;  // Rule 01, the target
 const CHILDREN_MIN = 2;   // Rule 05, a division that divides nothing
 
 const ARGUMENT = {
@@ -192,8 +191,8 @@ function checkChildren() {
 
     if (n > CHILDREN_MAX) {
         say(childrenMessage,
-            `Rule 01 — five parts, at most seven. This is ${n}. The ceiling is `
-            + 'Miller (1956) at the cautious end, not a target to reach.', 'error');
+            `Rule 01 — at most seven. This is ${n}. The ceiling is `
+            + 'Miller (1956), not a target to reach.', 'error');
         return 'refused';
     }
     if (n < CHILDREN_MIN) {
@@ -202,13 +201,6 @@ function checkChildren() {
             + 'either give it two or more, or the node is an endpoint.', 'error');
         return 'refused';
     }
-    if (n > CHILDREN_WARN) {
-        say(childrenMessage,
-            `Rule 01 — ${n} parts is within the ceiling of seven but above the target `
-            + 'of five. Worth asking whether two of them are the same.', 'working');
-        return 'warned';
-    }
-
     const missingDefinition = blocks.filter(
         (b) => b.querySelector('[data-field="definition"]').value.trim() === '').length;
     if (missingDefinition) {

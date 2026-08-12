@@ -301,7 +301,7 @@ function summarisePayload(type, payload) {
 // exactly why they are the ones a rejection most often has to name.
 
 const RULES = [
-    ['01', 'Five parts, at most seven'],
+    ['01', 'At most seven'],
     ['02', 'Mutually exclusive'],
     ['03', 'Collectively exhaustive'],
     ['04', 'Equal abstraction'],
