@@ -29,6 +29,7 @@ router.get('/', async (req, res, next) => {
     try {
         const { rows } = await pool.query(
             `SELECT c.id, c.node_path, c.parent_id, c.display_as, c.body, c.created_at,
+                    c.parts, c.title, c.evidence,
                     a.display_name, a.withdrawn_at
                FROM atlas.comments c
                JOIN atlas.accounts a ON a.id = c.account_id
@@ -55,13 +56,22 @@ router.get('/new', (req, res) => {
         formToken: proposals.issueFormToken(),
         minSeconds: proposals.MIN_SECONDS_ON_FORM,
         bodyMax: comments.BODY_MAX,
+        titleMax: comments.TITLE_MAX,
+        evidenceMax: comments.EVIDENCE_MAX,
+        nodesMax: comments.NODES_MAX,
+        parts: comments.PARTS,
     });
 });
 
 // POST /atlas/comments
+//
+// A comment can address several nodes at once — the form is a multiselect —
+// and one row is written per node so each node's thread carries it. The rows
+// share their text, and each counts against the daily limit, because each is
+// a separate thing a person has to read.
 router.post('/', session.requireCsrf, async (req, res, next) => {
     const body = req.body || {};
-    const { nodePath, displayAs, formToken, parentId } = body;
+    const { displayAs, formToken, parentId } = body;
 
     // Same honeypot, same 202. Telling a bot which check it failed is how the
     // next version of it passes.
@@ -75,11 +85,37 @@ router.post('/', session.requireCsrf, async (req, res, next) => {
         });
     }
 
+    // `nodePaths` is the form's shape; a bare `nodePath` string is accepted
+    // and treated as a list of one.
+    const nodePaths = Array.isArray(body.nodePaths)
+        ? body.nodePaths
+        : (body.nodePath === undefined ? [] : [body.nodePath]);
+
+    let pathsProblem = null;
+    if (nodePaths.length === 0) {
+        pathsProblem = 'A comment needs a node.';
+    } else if (nodePaths.length > comments.NODES_MAX) {
+        pathsProblem = `A comment can address at most ${comments.NODES_MAX} nodes.`;
+    } else if (new Set(nodePaths.map((p) => String(p).trim())).size !== nodePaths.length) {
+        pathsProblem = 'Each node once.';
+    } else if (parentId && nodePaths.length > 1) {
+        // A reply answers one comment, which sits on one node's thread.
+        pathsProblem = 'A reply is to one comment on one node.';
+    } else {
+        for (const p of nodePaths) {
+            pathsProblem = proposals.nodePathProblem(p);
+            if (pathsProblem) break;
+        }
+    }
+
     const problem =
-        proposals.nodePathProblem(nodePath)
+        pathsProblem
         || proposals.displayAsProblem(displayAs)
         || comments.parentProblem(parentId)
+        || comments.partsProblem(body.parts)
+        || comments.titleProblem(body.title)
         || comments.bodyProblem(body.body)
+        || comments.evidenceProblem(body.evidence, body.body)
         || proposals.formTokenProblem(formToken);
 
     if (problem) return res.status(400).json({ error: problem });
@@ -92,56 +128,75 @@ router.post('/', session.requireCsrf, async (req, res, next) => {
               WHERE account_id = $1 AND created_at > now() - interval '1 day'`,
             [req.account.id]
         );
-        if (recent[0].n >= PER_ACCOUNT_PER_DAY) {
+        if (recent[0].n + nodePaths.length > PER_ACCOUNT_PER_DAY) {
             res.set('Retry-After', String(24 * 60 * 60));
             return res.status(429).json({
-                error: `That is ${PER_ACCOUNT_PER_DAY} comments today. `
-                     + 'The limit is per day, and every one of them is read by a person.',
+                error: `The limit is ${PER_ACCOUNT_PER_DAY} comments a day, and a `
+                     + 'comment on several nodes counts once per node. '
+                     + 'Every one of them is read by a person.',
             });
         }
 
         await limits.record('comment', { ip: req.ip, accountId: req.account.id, succeeded: true });
 
+        // One row per node, all or none.
+        const client = await pool.connect();
         let rows;
         try {
-            ({ rows } = await pool.query(
-                `INSERT INTO atlas.comments
-                     (account_id, node_path, parent_id, display_as, body)
-                 VALUES ($1, $2, $3, $4, $5)
-                 RETURNING id, node_path, parent_id, display_as, status, created_at`,
-                [
-                    req.account.id,
-                    String(nodePath).trim(),
-                    parentId ? String(parentId) : null,
-                    displayAs,
-                    String(body.body).trim(),
-                ]
-            ));
+            await client.query('BEGIN');
+            rows = [];
+            for (const p of nodePaths) {
+                const { rows: inserted } = await client.query(
+                    `INSERT INTO atlas.comments
+                         (account_id, node_path, parent_id, display_as,
+                          parts, title, body, evidence)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                     RETURNING id, node_path, parent_id, status, created_at`,
+                    [
+                        req.account.id,
+                        String(p).trim(),
+                        parentId ? String(parentId) : null,
+                        displayAs,
+                        body.parts,
+                        String(body.title).trim(),
+                        String(body.body).trim(),
+                        String(body.evidence).trim(),
+                    ]
+                );
+                rows.push(inserted[0]);
+            }
+            await client.query('COMMIT');
         } catch (err) {
+            await client.query('ROLLBACK');
             // The depth rule and the same-node rule are a trigger, so they
             // arrive as errors rather than as a check this route ran. Turned
             // back into the sentence the person needs.
             if (err && err.code === '23514') {
                 return res.status(400).json({
-                    error: 'Replies go one level deep. Answering a reply wants to be '
-                         + 'a comment of its own, or a proposal.',
+                    error: 'Replies go one level deep, on the same node as the comment '
+                         + 'they answer. Anything else wants to be a comment of its '
+                         + 'own, or a proposal.',
                 });
             }
             if (err && /does not exist/.test(String(err.message))) {
                 return res.status(400).json({ error: 'That comment is no longer there.' });
             }
             throw err;
+        } finally {
+            client.release();
         }
 
         return res.status(201).json({
-            comment: {
-                id: String(rows[0].id),
-                nodePath: rows[0].node_path,
-                parentId: rows[0].parent_id === null ? null : String(rows[0].parent_id),
-                status: rows[0].status,
-                createdAt: rows[0].created_at,
-            },
-            message: 'Posted. It appears on the node page once it has been read.',
+            comments: rows.map((r) => ({
+                id: String(r.id),
+                nodePath: r.node_path,
+                parentId: r.parent_id === null ? null : String(r.parent_id),
+                status: r.status,
+                createdAt: r.created_at,
+            })),
+            message: nodePaths.length === 1
+                ? 'Posted. It appears on the node page once it has been read.'
+                : `Posted to ${nodePaths.length} nodes. Each appears once it has been read.`,
         });
     } catch (err) {
         return next(err);

@@ -151,18 +151,30 @@ has learned the method.
 Every node carries a thread. One level of replies, no deeper — nested argument
 past that point wants to be a proposal.
 
+A comment targets specific parts of a node: the six required fields, the
+division into children, or the node in general. The form can address several
+nodes at once — one row is written per node. Title and evidence are required
+of every new comment; evidence is a citation, URL, or atlas node path (an
+internal cross-reference counts), checked only for being non-empty and
+distinct from the body, never for being a *good* source.
+
     comments
       id
       account_id
       node_path
       parent_id            -- null for top level
       display_as
+      parts                -- text[]: node | definition | inclusion | exclusion
+                           --   | sources | boundary_cases | uncertainty | children
+      title                -- 200 chars; null only on pre-targeting rows
       body                 -- 2000 chars
+      evidence             -- 1000 chars; null only on pre-targeting rows
       status               -- 'pending' | 'published' | 'rejected'
       decision_reason      -- required when rejected
       created_at
 
-Same rate limits and honeypot. Same publish-at-build-time model.
+Same rate limits and honeypot — a comment on several nodes counts once per
+node. Same publish-at-build-time model.
 
 ---
 
@@ -206,8 +218,12 @@ Each node page gains, below its justification:
 commit that implemented them. Rejected ones listed with their reason and the
 rule that failed. Pending ones are not shown.
 
-**Discussion** — published comments, threaded one level, each with display name
-or Anonymous and a date.
+**Discussion** — published comments, grouped by the part of the node each
+addresses (the node in general first), threaded one level, each with display
+name or Anonymous and a date. Each section of the node page carries a small
+marker by its heading: the count of comments targeting that part, and the
+link to comment on it — a plain link into /discuss/ with the node and part in
+the query, because node pages run no script.
 
 **Two links** — propose a change, join the discussion. Both go to the dynamic
 pages.

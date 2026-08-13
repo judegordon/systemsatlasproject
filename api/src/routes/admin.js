@@ -119,6 +119,7 @@ router.get('/queue', async (req, res, next) => {
         // to carry which pair applies to each row anyway.
         const { rows: pendingComments } = await pool.query(
             `SELECT c.id, c.node_path, c.parent_id, c.display_as, c.body, c.created_at,
+                    c.parts, c.title, c.evidence,
                     a.id AS account_id, a.email, a.display_name, a.verified_at,
                     a.created_at AS account_created_at,
                     p.body AS parent_body
@@ -138,7 +139,10 @@ router.get('/queue', async (req, res, next) => {
             // for the comment above it.
             replyingTo: r.parent_body,
             submission: {
+                parts: r.parts && r.parts.length ? r.parts : ['node'],
+                title: r.title ?? null,
                 body: r.body,
+                evidence: r.evidence ?? null,
                 displayAs: r.display_as,
                 createdAt: r.created_at,
             },

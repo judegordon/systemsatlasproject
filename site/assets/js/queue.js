@@ -144,7 +144,17 @@ function renderComment(item) {
 
     const body = el('section', 'queue-panel');
     body.append(el('h3', 'queue-panel__title', 'The comment'));
+    if (item.submission.parts) {
+        body.append(el('p', 'queue-field__label',
+            `On: ${item.submission.parts.join(', ')}`));
+    }
+    if (item.submission.title) {
+        body.append(el('p', 'queue-comment-title', item.submission.title));
+    }
     body.append(el('pre', 'queue-body', item.submission.body));
+    if (item.submission.evidence) {
+        body.append(el('p', 'queue-field__label', `Evidence: ${item.submission.evidence}`));
+    }
     body.append(el('p', 'queue-field__label',
         item.submission.displayAs === 'anonymous'
             ? 'To be published anonymously'

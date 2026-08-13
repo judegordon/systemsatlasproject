@@ -23,7 +23,10 @@ const OTHER = 'legal';
 function aComment(over = {}) {
     return {
         nodePath: NODE,
+        parts: ['node'],
+        title: 'An exclusion pointing nowhere',
         body: 'The exclusion here points at a system that does not exist.',
+        evidence: 'human-biological/nervous-system',
         displayAs: 'name',
         formToken: proposals.issueFormToken(Date.now() - 30000),
         website: '',
@@ -48,9 +51,9 @@ async function admin(email = 'admin@example.com') {
 async function published(client, adminClient, over = {}) {
     const r = await client.post('/atlas/comments', aComment(over));
     assert.equal(r.status, 201, `posting was ${r.status}`);
-    const d = await adminClient.post(`/atlas/admin/comments/${r.data.comment.id}/publish`, {});
+    const d = await adminClient.post(`/atlas/admin/comments/${r.data.comments[0].id}/publish`, {});
     assert.equal(d.status, 200, `publishing was ${d.status}`);
-    return r.data.comment.id;
+    return r.data.comments[0].id;
 }
 
 function anyone() {
@@ -68,8 +71,8 @@ describe('posting', () => {
         const r = await c.post('/atlas/comments', aComment());
 
         assert.equal(r.status, 201);
-        assert.equal(r.data.comment.status, 'pending');
-        assert.equal(r.data.comment.parentId, null);
+        assert.equal(r.data.comments[0].status, 'pending');
+        assert.equal(r.data.comments[0].parentId, null);
     });
 
     test('a comment over 2000 characters is refused, and told it is a proposal', async () => {
@@ -127,6 +130,131 @@ describe('posting', () => {
 });
 
 
+describe('targets: parts, title, evidence', () => {
+    test('a missing title is refused', async () => {
+        const c = await contributor();
+        const r = await c.post('/atlas/comments', aComment({ title: '' }));
+        assert.equal(r.status, 400);
+        assert.match(r.data.error, /title/i);
+    });
+
+    test('missing evidence is refused', async () => {
+        const c = await contributor();
+        const r = await c.post('/atlas/comments', aComment({ evidence: '   ' }));
+        assert.equal(r.status, 400);
+        assert.match(r.data.error, /evidence/i);
+    });
+
+    test('evidence that merely repeats the body is refused', async () => {
+        const c = await contributor();
+        const body = 'The same words twice over.';
+        const r = await c.post('/atlas/comments', aComment({ body, evidence: body }));
+        assert.equal(r.status, 400);
+        assert.match(r.data.error, /outside the comment/i);
+    });
+
+    test('no parts, or an unknown part, is refused', async () => {
+        const c = await contributor();
+        assert.equal((await c.post('/atlas/comments', aComment({ parts: [] }))).status, 400);
+        assert.equal((await c.post('/atlas/comments',
+            aComment({ parts: ['margins'] }))).status, 400);
+        assert.equal((await c.post('/atlas/comments',
+            aComment({ parts: ['node', 'node'] }))).status, 400);
+    });
+
+    test('a comment can target several parts, and they publish with it', async () => {
+        const c = await contributor();
+        const a = await admin();
+        await published(c, a, { parts: ['definition', 'exclusion'] });
+
+        const r = await anyone().get('/atlas/comments');
+        assert.deepEqual(r.data.comments[0].parts, ['definition', 'exclusion']);
+        assert.equal(r.data.comments[0].title, 'An exclusion pointing nowhere');
+        assert.equal(r.data.comments[0].evidence, 'human-biological/nervous-system');
+    });
+
+    test('a comment already in the table without targets publishes as node-general', async () => {
+        // Every comment from before 005_comment_targets.sql is exactly this row.
+        const c = await contributor();
+        const a = await admin();
+        const id = await published(c, a);
+        await h.pool.query(
+            `UPDATE atlas.comments SET parts = DEFAULT, title = NULL, evidence = NULL
+              WHERE id = $1`, [id]);
+
+        const r = await anyone().get('/atlas/comments');
+        assert.deepEqual(r.data.comments[0].parts, ['node']);
+        assert.equal(r.data.comments[0].title, null);
+        assert.equal(r.data.comments[0].evidence, null);
+    });
+});
+
+
+describe('several nodes at once', () => {
+    test('one comment on two nodes writes a row on each thread', async () => {
+        const c = await contributor();
+        const r = await c.post('/atlas/comments',
+            aComment({ nodePath: undefined, nodePaths: [NODE, OTHER] }));
+
+        assert.equal(r.status, 201);
+        assert.equal(r.data.comments.length, 2);
+        assert.deepEqual(r.data.comments.map((x) => x.nodePath).sort(), [NODE, OTHER].sort());
+    });
+
+    test('a bad path anywhere in the list refuses the lot', async () => {
+        const c = await contributor();
+        const r = await c.post('/atlas/comments',
+            aComment({ nodePath: undefined, nodePaths: [NODE, 'invented/node'] }));
+        assert.equal(r.status, 400);
+
+        const { rows } = await h.pool.query('SELECT count(*)::int AS n FROM atlas.comments');
+        assert.equal(rows[0].n, 0, 'nothing is written when any path fails');
+    });
+
+    test('the same node twice, more than four, or none is refused', async () => {
+        const c = await contributor();
+        assert.equal((await c.post('/atlas/comments',
+            aComment({ nodePath: undefined, nodePaths: [NODE, NODE] }))).status, 400);
+        assert.equal((await c.post('/atlas/comments',
+            aComment({ nodePath: undefined, nodePaths: [] }))).status, 400);
+        assert.equal((await c.post('/atlas/comments', aComment({
+            nodePath: undefined,
+            nodePaths: [NODE, OTHER, 'legal/courts', 'political', 'economic'],
+        }))).status, 400);
+    });
+
+    test('a reply cannot address several nodes', async () => {
+        const c = await contributor();
+        const a = await admin();
+        const top = await published(c, a);
+        const r = await c.post('/atlas/comments', aComment({
+            nodePath: undefined, nodePaths: [NODE, OTHER], parentId: top, body: 'Agreed.',
+        }));
+        assert.equal(r.status, 400);
+        assert.match(r.data.error, /one comment on one node/i);
+    });
+
+    test('each node written counts against the daily five', async () => {
+        const c = await contributor();
+        for (let i = 0; i < 2; i += 1) {
+            const r = await c.post('/atlas/comments', aComment({
+                nodePath: undefined, nodePaths: [NODE, OTHER], body: `Comment ${i}.`,
+            }));
+            assert.equal(r.status, 201);
+        }
+        // Four rows written; a two-node comment would be six, and is refused.
+        const r = await c.post('/atlas/comments', aComment({
+            nodePath: undefined, nodePaths: [NODE, OTHER], body: 'Over the line.',
+        }));
+        assert.equal(r.status, 429);
+
+        // One more single-node comment still fits.
+        const last = await c.post('/atlas/comments', aComment({ body: 'The fifth.' }));
+        assert.equal(last.status, 201);
+    });
+});
+
+
 describe('one level of replies, no deeper', () => {
     test('a reply to a top-level comment is allowed', async () => {
         const c = await contributor();
@@ -135,7 +263,7 @@ describe('one level of replies, no deeper', () => {
 
         const reply = await c.post('/atlas/comments', aComment({ parentId: top, body: 'Agreed.' }));
         assert.equal(reply.status, 201);
-        assert.equal(reply.data.comment.parentId, String(top));
+        assert.equal(reply.data.comments[0].parentId, String(top));
     });
 
     test('a reply to a reply is refused, and told why', async () => {
@@ -147,7 +275,7 @@ describe('one level of replies, no deeper', () => {
         assert.equal(reply.status, 201);
 
         const deeper = await c.post('/atlas/comments',
-            aComment({ parentId: reply.data.comment.id, body: 'And further.' }));
+            aComment({ parentId: reply.data.comments[0].id, body: 'And further.' }));
         assert.equal(deeper.status, 400);
         assert.match(deeper.data.error, /one level/i);
     });
@@ -163,7 +291,7 @@ describe('one level of replies, no deeper', () => {
             () => h.pool.query(
                 `INSERT INTO atlas.comments (account_id, node_path, parent_id, display_as, body)
                  VALUES ($1, $2, $3, 'name', 'Straight past the route.')`,
-                [rows[0].id, NODE, reply.data.comment.id]
+                [rows[0].id, NODE, reply.data.comments[0].id]
             ),
             /one level only/
         );
@@ -235,7 +363,7 @@ describe('the queue', () => {
         const c = await contributor();
         const r0 = await c.post('/atlas/comments', aComment());
         const meddler = await contributor('meddler@example.com');
-        const r = await meddler.post(`/atlas/admin/comments/${r0.data.comment.id}/publish`, {});
+        const r = await meddler.post(`/atlas/admin/comments/${r0.data.comments[0].id}/publish`, {});
         assert.equal(r.status, 404);
     });
 });
@@ -247,13 +375,13 @@ describe('publish and reject', () => {
         const a = await admin();
         const r0 = await c.post('/atlas/comments', aComment());
 
-        const r = await a.post(`/atlas/admin/comments/${r0.data.comment.id}/publish`, {});
+        const r = await a.post(`/atlas/admin/comments/${r0.data.comments[0].id}/publish`, {});
         assert.equal(r.status, 200);
         assert.equal(r.data.comment.status, 'published');
 
         const { rows } = await h.pool.query(
             'SELECT status, decision_reason FROM atlas.comments WHERE id = $1',
-            [r0.data.comment.id]);
+            [r0.data.comments[0].id]);
         assert.equal(rows[0].status, 'published');
         assert.equal(rows[0].decision_reason, null);
     });
@@ -263,16 +391,16 @@ describe('publish and reject', () => {
         const a = await admin();
         const r0 = await c.post('/atlas/comments', aComment());
 
-        const blank = await a.post(`/atlas/admin/comments/${r0.data.comment.id}/reject`, {});
+        const blank = await a.post(`/atlas/admin/comments/${r0.data.comments[0].id}/reject`, {});
         assert.equal(blank.status, 400);
 
-        const ok = await a.post(`/atlas/admin/comments/${r0.data.comment.id}/reject`,
+        const ok = await a.post(`/atlas/admin/comments/${r0.data.comments[0].id}/reject`,
             { reason: 'Restates the node without adding to it.' });
         assert.equal(ok.status, 200);
 
         const { rows } = await h.pool.query(
             'SELECT status, decision_reason FROM atlas.comments WHERE id = $1',
-            [r0.data.comment.id]);
+            [r0.data.comments[0].id]);
         assert.equal(rows[0].status, 'rejected');
         assert.match(rows[0].decision_reason, /Restates the node/);
     });
@@ -282,8 +410,8 @@ describe('publish and reject', () => {
         const a = await admin();
         const r0 = await c.post('/atlas/comments', aComment());
 
-        await a.post(`/atlas/admin/comments/${r0.data.comment.id}/publish`, {});
-        const again = await a.post(`/atlas/admin/comments/${r0.data.comment.id}/reject`,
+        await a.post(`/atlas/admin/comments/${r0.data.comments[0].id}/publish`, {});
+        const again = await a.post(`/atlas/admin/comments/${r0.data.comments[0].id}/reject`,
             { reason: 'Changed my mind.' });
         assert.equal(again.status, 409);
     });
@@ -328,7 +456,7 @@ describe('what is published', () => {
         const c = await contributor();
         const a = await admin();
         const r0 = await c.post('/atlas/comments', aComment());
-        await a.post(`/atlas/admin/comments/${r0.data.comment.id}/reject`,
+        await a.post(`/atlas/admin/comments/${r0.data.comments[0].id}/reject`,
             { reason: 'Not an argument.' });
 
         const r = await anyone().get('/atlas/comments');
@@ -336,7 +464,7 @@ describe('what is published', () => {
     });
 
     test('the shape is the one scripts/build.mjs threads and renders', async () => {
-        // Step 7 reads these five field names off this endpoint. Renaming one
+        // Step 7 reads these field names off this endpoint. Renaming one
         // would leave the build writing "undefined" into a node page, and a
         // page that is wrong is worse than a build that failed.
         const c = await contributor('shape@example.com', 'Jo Bloggs');
@@ -346,7 +474,8 @@ describe('what is published', () => {
         const { data } = await anyone().get('/atlas/comments');
         const posted = data.comments[0];
 
-        for (const field of ['id', 'nodePath', 'parentId', 'author', 'body', 'createdAt']) {
+        for (const field of ['id', 'nodePath', 'parentId', 'author', 'body', 'createdAt',
+            'parts', 'title', 'evidence']) {
             assert.ok(field in posted, `the build needs ${field}`);
         }
         assert.equal(posted.parentId, null, 'top-level parentId must be null, not absent');
@@ -358,7 +487,7 @@ describe('what is published', () => {
         const a = await admin();
         const top = await published(c, a);
         const reply = await c.post('/atlas/comments', aComment({ parentId: top, body: 'Agreed.' }));
-        await a.post(`/atlas/admin/comments/${reply.data.comment.id}/publish`, {});
+        await a.post(`/atlas/admin/comments/${reply.data.comments[0].id}/publish`, {});
 
         const r = await anyone().get('/atlas/comments');
         const posted = r.data.comments.find((x) => x.parentId !== null);

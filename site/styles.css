@@ -2058,6 +2058,85 @@ textarea.form__input--tall { min-height: 13rem; }
 .field--night .comment__meta { color: var(--structure-3); }
 .field--night .comment--reply { border-left-color: var(--rule-light); }
 
+.comment__title {
+  font-weight: 700;
+  margin-bottom: var(--s2);
+}
+
+.comment__evidence {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--night-3);
+  margin-top: var(--s2);
+}
+
+.field--night .comment__evidence { color: var(--structure-3); }
+.field--night .comment__evidence a { color: var(--structure-2); }
+
+/* Part markers ---------------------------------------------------------------
+   The small link beside a section heading on a node page: comment on this
+   part, carrying the count when the part has comments. A plain link into
+   /discuss/ — the node page runs no script. */
+
+.part-marker {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--night-3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--night-3);
+}
+
+.part-marker:hover { color: var(--night); border-bottom-color: var(--night); }
+
+.field--night .part-marker { color: var(--structure-3); border-bottom-color: var(--structure-3); }
+.field--night .part-marker:hover { color: var(--structure); border-bottom-color: var(--structure); }
+
+.node-field__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.node-field__head .node-field__label { margin-bottom: 0; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+/* Discussion grouped by part ------------------------------------------------ */
+
+.discussion__part {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--structure-3);
+  max-width: var(--reading);
+  margin: var(--s6) auto 0;
+}
+
+.thread--part { margin-top: var(--s3); }
+
+/* The node multiselect on /discuss/ ----------------------------------------- */
+
+.node-input {
+  display: flex;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+}
+
+.node-input .form__input { flex: 1; }
+
+.queue-comment-title { font-weight: 700; }
+
 .account-section {
   border-top: 1px solid var(--rule-dark);
   padding-top: var(--s5);

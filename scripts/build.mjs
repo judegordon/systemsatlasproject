@@ -373,12 +373,58 @@ function renderExclusion(ex) {
   return `${text(ex.text ?? "?")} — ${label} ${destination(ex.goes_to, ex.kind === "lens")}${extra}`;
 }
 
-function renderField(node, [key, label, gapNote]) {
+// The parts a comment can target are the sections this file renders, in the
+// order it renders them: the six fields, then the division into children, and
+// "node" for the node in general. The API holds the same list; the two have
+// to agree or a comment targets a section that does not exist.
+const PART_LABELS = {
+  node: "The node in general",
+  definition: "Definition",
+  inclusion: "Inclusion",
+  exclusion: "Exclusion",
+  sources: "Sources",
+  boundary_cases: "Boundary cases",
+  uncertainty: "Uncertainty",
+  children: "Children / division",
+};
+const PART_ORDER = Object.keys(PART_LABELS);
+
+// How many published comments target each part of this node. A comment about
+// several parts counts once under each — it addresses each of them.
+function countByPart(tops) {
+  const counts = new Map();
+  const bump = (c) => {
+    for (const part of c.parts && c.parts.length ? c.parts : ["node"]) {
+      counts.set(part, (counts.get(part) ?? 0) + 1);
+    }
+  };
+  for (const top of tops) {
+    bump(top);
+    for (const reply of top.replies ?? []) bump(reply);
+  }
+  return counts;
+}
+
+// The marker beside a section heading: the link to comment on that part,
+// carrying the count when the part has comments. A plain link into /discuss/
+// with the node and part in the query — the node page itself runs no script.
+function partMarker(path, part, counts) {
+  const n = counts.get(part) ?? 0;
+  const label = n ? `Comment · ${n}` : "Comment";
+  return `<a class="part-marker" href="/discuss/?node=${esc(path)}&amp;part=${esc(part)}"` +
+    ` aria-label="Comment on ${PART_LABELS[part].toLowerCase()}">${label}</a>`;
+}
+
+function renderField(node, [key, label, gapNote], path, counts) {
   const value = node[key];
+  const head = `<div class="node-field__head">
+            <h3 class="node-field__label">${label}</h3>
+            ${partMarker(path, key, counts)}
+          </div>`;
 
   if (isEmpty(value)) {
     return `        <div class="node-field">
-          <h3 class="node-field__label">${label}</h3>
+          ${head}
           <p class="gap"><span class="gap__tag">Declared gap</span> ${gapNote}</p>
         </div>`;
   }
@@ -395,7 +441,7 @@ function renderField(node, [key, label, gapNote]) {
   }
 
   return `        <div class="node-field">
-          <h3 class="node-field__label">${label}</h3>
+          ${head}
           ${body}
         </div>`;
 }
@@ -669,23 +715,45 @@ ${body}
 function renderDiscussion(tops, path) {
   const total = tops.reduce((n, t) => n + 1 + t.replies.length, 0);
 
+  // Evidence that is an atlas path is a cross-reference and links like one.
+  const evidenceLine = (e) => {
+    if (!e) return "";
+    const ref = String(e).trim();
+    const target = nodes.has(ref)
+      ? `<a href="/atlas/${esc(ref)}/">${text(ref)}</a>`
+      : text(ref);
+    return `\n          <p class="comment__evidence">Evidence: ${target}</p>`;
+  };
+
   const comment = (c, isReply) => `        <article class="comment${
     isReply ? " comment--reply" : ""}">
           <p class="comment__meta">${text(c.author)} · ${
-            text(String(c.createdAt ?? "").slice(0, 10))}</p>
-          <p class="comment__body">${esc(String(c.body ?? "").trim())}</p>
+            text(String(c.createdAt ?? "").slice(0, 10))}</p>${
+          c.title ? `\n          <p class="comment__title">${text(c.title)}</p>` : ""}
+          <p class="comment__body">${esc(String(c.body ?? "").trim())}</p>${
+          evidenceLine(c.evidence)}
         </article>`;
 
-  const body = tops.length
-    ? `      <div class="thread">\n${tops.map((t) =>
-        [comment(t, false), ...t.replies.map((r) => comment(r, true))].join("\n")
-      ).join("\n")}\n      </div>`
-    : "";
+  // Grouped by the part the comment targets, the node in general first, then
+  // the parts in the order the page renders them. A comment about several
+  // parts appears under each — it addresses each of them.
+  const groups = PART_ORDER.map((part) => {
+    const here = tops.filter((t) =>
+      (t.parts && t.parts.length ? t.parts : ["node"]).includes(part));
+    if (!here.length) return "";
+    return `      <h3 class="discussion__part">${PART_LABELS[part]}</h3>
+      <div class="thread thread--part">
+${here.map((t) => [comment(t, false), ...t.replies.map((r) => comment(r, true))].join("\n")).join("\n")}
+      </div>`;
+  }).filter(Boolean).join("\n");
+
+  const body = tops.length ? groups : "";
 
   const lead = total === 0
     ? `Nothing published on this node yet.`
-    : `${total} comment${total === 1 ? "" : "s"}, one level of replies. An argument
-          that needs to nest further is a proposal.`;
+    : `${total} comment${total === 1 ? "" : "s"}, grouped by the part of the
+          node each addresses, one level of replies. An argument that needs to
+          nest further is a proposal.`;
 
   return `
   <!-- Discussion =========================================================== -->
@@ -746,7 +814,7 @@ ${cards}
 `;
 }
 
-function renderChildren(node, path, depth) {
+function renderChildren(node, path, depth, counts) {
   const kids = node.children ?? [];
   if (!kids.length) return "";
 
@@ -768,7 +836,10 @@ function renderChildren(node, path, depth) {
   <section class="field--night band">
     <div class="wrap">
       <p class="eyebrow">Divides into</p>
-      <h2 class="section-title">${kids.length} component${kids.length === 1 ? "" : "s"} at level ${depth + 1}.</h2>
+      <div class="section-head">
+        <h2 class="section-title">${kids.length} component${kids.length === 1 ? "" : "s"} at level ${depth + 1}.</h2>
+        ${partMarker(path, "children", counts)}
+      </div>
       <div class="kids">
 ${cards}
       </div>
@@ -940,6 +1011,13 @@ let orphanedComments = 0;
   }
 }
 
+// The discuss form's node picker is a datalist of every path in the atlas,
+// baked in at build time — counted, not typed, like everything else a page
+// states about the atlas.
+generated.set("node-datalist", `      <datalist id="node-paths">
+${[...nodes.keys()].sort().map((p) => `        <option value="${esc(p)}"></option>`).join("\n")}
+      </datalist>`);
+
 // --- hand-written pages ----------------------------------------------------
 
 if (existsSync(PAGES)) copyPages(PAGES);
@@ -951,6 +1029,8 @@ for (const [path, { node, depth, trail }] of nodes) {
     : String(node.definition).trim().replace(/\s+/g, " ").slice(0, 180);
 
   const entries = byNode.get(path) ?? [];
+  const nodeComments = commentsByNode.get(path) ?? [];
+  const partTally = countByPart(nodeComments);
 
   const html = expand(fill(nodeShell, {
     title: `${node.name} — Systems Atlas`,
@@ -959,13 +1039,13 @@ for (const [path, { node, depth, trail }] of nodes) {
     path,
     level: String(depth),
     breadcrumb: renderBreadcrumb(trail),
-    fields: FIELDS.map((f) => renderField(node, f)).join("\n"),
-    children: renderChildren(node, path, depth),
+    fields: FIELDS.map((f) => renderField(node, f, path, partTally)).join("\n"),
+    children: renderChildren(node, path, depth, partTally),
     tree: depth === 0 && kids.length ? renderTree(node, domainStats.get(node.id).count) : "",
     checks: renderChecks(node),
     diagnostics: renderNodeDiagnostics(entries),
     proposals: renderProposals(proposalsByNode.get(path) ?? [], path),
-    discussion: renderDiscussion(commentsByNode.get(path) ?? [], path),
+    discussion: renderDiscussion(nodeComments, path),
   }), `atlas/${path}`);
 
   const out = join(DIST, "atlas", ...path.split("/"), "index.html");

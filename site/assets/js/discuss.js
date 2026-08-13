@@ -11,11 +11,28 @@ const unverified = document.getElementById('unverified-note');
 
 const form = document.getElementById('comment-form');
 const message = document.getElementById('form-message');
+const titleField = document.getElementById('title');
 const bodyField = document.getElementById('body');
+const evidenceField = document.getElementById('evidence');
+const nodeInputs = document.getElementById('node-inputs');
+const addNode = document.getElementById('add-node');
 const replyingTo = document.getElementById('replying-to');
 const cancelReply = document.getElementById('cancel-reply');
 
-const nodePath = new URLSearchParams(window.location.search).get('node') || '';
+const PART_LABEL = {
+    node: 'the node in general',
+    definition: 'definition',
+    inclusion: 'inclusion',
+    exclusion: 'exclusion',
+    sources: 'sources',
+    boundary_cases: 'boundary cases',
+    uncertainty: 'uncertainty',
+    children: 'children / division',
+};
+
+const params = new URLSearchParams(window.location.search);
+const nodePath = params.get('node') || '';
+const NODES_MAX = 4;
 
 let formToken = null;
 let parentId = null;
@@ -27,6 +44,52 @@ function el(tag, className, text) {
     if (className) node.className = className;
     if (text !== undefined && text !== null) node.textContent = String(text);
     return node;
+}
+
+// The node multiselect --------------------------------------------------------
+//
+// A list of path inputs against the datalist the build bakes into this page.
+// Editable and repeatable; the server checks each path against the manifest.
+
+function addNodeInput(value) {
+    if (nodeInputs.children.length >= NODES_MAX) return;
+    const row = el('div', 'node-input');
+    const input = el('input', 'form__input');
+    input.type = 'text';
+    input.name = 'nodePaths';
+    input.setAttribute('list', 'node-paths');
+    input.value = value || '';
+    row.append(input);
+
+    if (nodeInputs.children.length > 0) {
+        const remove = el('button', 'form__button form__button--quiet', 'Remove');
+        remove.type = 'button';
+        remove.addEventListener('click', () => row.remove());
+        row.append(remove);
+    }
+    nodeInputs.append(row);
+}
+
+function selectedNodes() {
+    return [...nodeInputs.querySelectorAll('input')]
+        .map((i) => i.value.trim())
+        .filter((v, i, all) => v !== '' && all.indexOf(v) === i);
+}
+
+addNode.addEventListener('click', () => addNodeInput(''));
+
+// Parts -----------------------------------------------------------------------
+
+function partBoxes() {
+    return [...form.querySelectorAll('input[name="parts"]')];
+}
+
+function selectedParts() {
+    return partBoxes().filter((b) => b.checked).map((b) => b.value);
+}
+
+function setParts(parts) {
+    for (const box of partBoxes()) box.checked = parts.includes(box.value);
 }
 
 // Load ------------------------------------------------------------------------
@@ -42,6 +105,15 @@ function el(tag, className, text) {
     const link = document.getElementById('node-link');
     link.href = `/atlas/${nodePath}/`;
     link.textContent = `Read ${nodePath} →`;
+
+    // Prefill: every ?node= names a node, every ?part= a part. Opened from a
+    // section marker both are set; opened from the general link the part
+    // defaults to the node itself.
+    for (const p of params.getAll('node')) addNodeInput(p);
+    if (!nodeInputs.children.length) addNodeInput('');
+
+    const parts = params.getAll('part').filter((p) => p in PART_LABEL);
+    setParts(parts.length ? parts : ['node']);
 
     await loadThread();
 
@@ -93,7 +165,10 @@ async function loadThread() {
 
     for (const top of tops) {
         const block = el('article', 'comment');
-        block.append(meta(top), el('p', 'comment__body', top.body));
+        block.append(meta(top));
+        if (top.title) block.append(el('p', 'comment__title', top.title));
+        block.append(el('p', 'comment__body', top.body));
+        if (top.evidence) block.append(el('p', 'comment__evidence', `Evidence: ${top.evidence}`));
 
         const reply = el('button', 'comment__reply', 'Reply');
         reply.type = 'button';
@@ -102,7 +177,10 @@ async function loadThread() {
 
         for (const child of repliesTo.get(top.id) || []) {
             const sub = el('article', 'comment comment--reply');
-            sub.append(meta(child), el('p', 'comment__body', child.body));
+            sub.append(meta(child));
+            if (child.title) sub.append(el('p', 'comment__title', child.title));
+            sub.append(el('p', 'comment__body', child.body));
+            if (child.evidence) sub.append(el('p', 'comment__evidence', `Evidence: ${child.evidence}`));
             block.append(sub);
         }
 
@@ -111,21 +189,35 @@ async function loadThread() {
 }
 
 function meta(comment) {
+    const parts = (comment.parts || ['node']).map((p) => PART_LABEL[p] || p).join(', ');
     return el('p', 'comment__meta',
-        `${comment.author} · ${String(comment.createdAt).slice(0, 10)}`);
+        `${comment.author} · ${String(comment.createdAt).slice(0, 10)} · on ${parts}`);
 }
 
+// A reply answers one comment on one node's thread, about the same parts, so
+// the node and part selectors lock while a reply is being written.
 function startReply(top) {
     parentId = top.id;
     replyingTo.textContent =
-        `Replying to ${top.author}: “${top.body.slice(0, 90)}${top.body.length > 90 ? '…' : ''}”`;
+        `Replying to ${top.author}: “${(top.title || top.body).slice(0, 90)}”`;
+    nodeInputs.replaceChildren();
+    addNodeInput(nodePath);
+    setParts(top.parts || ['node']);
+    setTargetsDisabled(true);
     show(replyingTo);
     show(cancelReply);
-    bodyField.focus();
+    titleField.focus();
+}
+
+function setTargetsDisabled(disabled) {
+    for (const input of nodeInputs.querySelectorAll('input, button')) input.disabled = disabled;
+    for (const box of partBoxes()) box.disabled = disabled;
+    addNode.disabled = disabled;
 }
 
 cancelReply.addEventListener('click', () => {
     parentId = null;
+    setTargetsDisabled(false);
     hide(replyingTo);
     hide(cancelReply);
 });
@@ -149,10 +241,24 @@ onSubmit(form, message, async (data) => {
         return;
     }
 
+    const nodePaths = parentId ? [nodePath] : selectedNodes();
+    if (!nodePaths.length) {
+        say(message, 'Name at least one node.', 'error');
+        return;
+    }
+    const parts = selectedParts();
+    if (!parts.length) {
+        say(message, 'Pick at least one part — "the node in general" if none fits.', 'error');
+        return;
+    }
+
     const { ok, status, data: body } = await request('POST', '/comments', {
-        nodePath,
+        nodePaths,
+        parts,
         parentId,
+        title: data.get('title'),
         body: data.get('body'),
+        evidence: data.get('evidence'),
         displayAs: data.get('displayAs'),
         formToken,
         website: data.get('website'),
@@ -170,6 +276,10 @@ onSubmit(form, message, async (data) => {
     form.reset();
     paintCount();
     parentId = null;
+    setTargetsDisabled(false);
+    nodeInputs.replaceChildren();
+    addNodeInput(nodePath);
+    setParts(['node']);
     hide(replyingTo);
     hide(cancelReply);
     say(message, body.message || 'Posted.', 'ok');
