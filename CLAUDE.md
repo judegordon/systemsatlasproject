@@ -7,9 +7,11 @@ not get re-litigated or quietly reversed.
 
 A decomposition of the systems that shape the world into their smallest
 defensible parts, with the method stated and the uncertainty left visible.
-The eventual aim is a model where changing one node propagates through the
-connected parts — but the map is valuable on its own, and the structural work
-comes first.
+The eventual aim is a model built on three layers: a structural
+decomposition, a separate functional decomposition, and a linkage layer
+mapping functional components to the structural parts they involve.
+Propagation runs across that mapping — but the map is valuable on its own,
+and the structural work comes first.
 
 It is an open project currently led by one person. That is a description of
 where it is, not of how it should stay.

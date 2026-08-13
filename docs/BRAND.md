@@ -261,9 +261,13 @@ The first screen should communicate:
 
 ### 3. Destination
 
-Explain the progression:
+Explain the three layers:
 
-**Structure → function → propagation**
+**Structure. Function. The linkage between them.**
+
+Structure and function are separate decompositions; the linkage maps
+functional components to the structural parts they involve, and propagation
+runs across it.
 
 Lead with the destination. Evidence it with the method.
 
