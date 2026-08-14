@@ -21,7 +21,7 @@
 
       <p class="eyebrow"><span class="eyebrow__no">KONKI</span> Privacy policy</p>
       <h1>What Konki collects, and what it does not.</h1>
-      <p class="doc__updated">Last updated 10 August 2026</p>
+      <p class="doc__updated">Last updated 14 August 2026</p>
 
       <p>Konki is built by Systems Atlas Project. This policy explains what data is collected, how it is used, and your rights over it.</p>
       <p><strong>Konki requires an account.</strong> Signing in is what lets your training sync between your devices, and signing out removes it from the device — your account is where your data lives.</p>
@@ -32,6 +32,7 @@
         <li>Your email address</li>
         <li>A hashed version of your password — the password itself is never stored</li>
         <li>Your training data: workout logs, exercise plans, templates, set and rep records, body-weight entries and goals</li>
+        <li>Your nutrition entries: what you type to describe a day's food, the calorie and macronutrient figures for that day (whether you typed them or accepted an estimate), and an optional daily target</li>
       </ul>
 
       <p>If you use Konki's social features, also:</p>
@@ -58,15 +59,21 @@
         <li>To review reports and act on accounts that break the rules</li>
         <li>To send a password reset code when you request one</li>
       </ul>
-      <p>Your data is not sold, not shared with third parties, and not used for advertising.</p>
+      <p>Your data is not sold, not used for advertising, and is never shared with anyone who might use it for their own purposes. The companies that host Konki and deliver its email process your data only to run the service — and one more joins them the moment you ask for it: if you press for an AI estimate, the text you wrote to describe that day's food is sent to Anthropic, which returns the estimated figures. Nothing else goes with it: not your name, not your email, not your training data, not your other entries.</p>
+
+      <h3>The AI estimate</h3>
+      <p>Estimating a day is always something you press a button to do. Konki never sends your food description anywhere on its own. When you do press it, that day's text — and only that text — goes to Konki's server and on to Anthropic, which returns rough calorie and macronutrient figures. Konki does not log the text of your request. Anthropic's commercial terms state that they do not train their models on content submitted through their API. The figures come back as a suggestion you can edit or ignore; nothing is saved until you save the day. Estimates are marked with a <code>~</code> wherever they appear, because they are guesses from a description, not measurements.</p>
+
+      <h3>Health app data</h3>
+      <p>If you connect Apple Health or Health Connect, Konki reads four figures for the day you are looking at: energy, protein, carbohydrate and fat. It reads them when you view a day, holds them only in memory, and never stores them. Those figures are shown beside your own entry and are never sent to Konki's server and never used for advertising. Konki never writes anything back to Apple Health or Health Connect, so nothing Konki estimates can end up in your other apps. You can disconnect at any time in Konki, and revoke access entirely in Apple Health or Health Connect.</p>
 
       <h2>What other people can see</h2>
-      <p>Your training data is private. Nobody else can see your logs, plans or body metrics unless you deliberately share a template or programme with them.</p>
-      <p>Other Konki users can see your username if you have set one, messages you send them, templates and programmes you share with them, and posts you make on the boards of groups you both belong to. If you connect a coach, they can see the templates and programmes you share and the sessions logged against them.</p>
+      <p>Your training data is private. Nobody else can see your logs, plans, body metrics or nutrition entries unless you deliberately share a template or programme with them.</p>
+      <p>Other Konki users can see your username if you have set one, messages you send them, templates and programmes you share with them, and posts you make on the boards of groups you both belong to. If you connect a coach, they can see the templates and programmes you share and the sessions logged against them. Coaches cannot see your nutrition entries.</p>
 
       <div class="notice">
         <p><strong>Sharing your training log is separate, and off unless you turn it on.</strong></p>
-        <p>Accepting a coach does not give them access to your calendar. If you choose to share your log with a specific coach, they can see every session in it — including sessions from before you connected — with the exercises, sets, durations and notes you recorded. Your body metrics, your goals, and anything not logged as a session stay private either way.</p>
+        <p>Accepting a coach does not give them access to your calendar. If you choose to share your log with a specific coach, they can see every session in it — including sessions from before you connected — with the exercises, sets, durations and notes you recorded. Your body metrics, your goals, your nutrition entries, and anything not logged as a session stay private either way.</p>
         <p>You can stop sharing at any time, from Connections. Access ends immediately.</p>
       </div>
 
@@ -78,6 +85,7 @@
 
       <h2>Where your data is stored</h2>
       <p>On servers hosted by Railway in the European Union. Passwords are hashed with bcrypt before storage. Authentication tokens are signed as JSON Web Tokens, and a token stops working the moment its account is deleted.</p>
+      <p>Anthropic processes the text of AI estimate requests, and only at the moment you request one.</p>
 
       <h2>Email</h2>
       <p>Resend is used to send transactional email — specifically the six-digit password reset code, which expires after 15 minutes. There are no marketing emails and no mailing list. Your email address is not shared with Resend beyond what is necessary to deliver those messages.</p>
@@ -87,7 +95,7 @@
 
       <h2>Data retention and deletion</h2>
       <p>Your data is retained for as long as your account exists.</p>
-      <p>You can delete your account from inside the app: <strong>Account → Delete Account</strong>. This permanently removes your account, your training data, your connections, your group memberships and posts, and your block list from the server, and wipes the data from your device. You can also request deletion by email — the <a href="/tools/konki/delete-account/">delete your account</a> page walks through both routes.</p>
+      <p>You can delete your account from inside the app: <strong>Account → Delete Account</strong>. This permanently removes your account, your training data, your nutrition entries, your connections, your group memberships and posts, and your block list from the server, and wipes the data from your device. You can also request deletion by email — the <a href="/tools/konki/delete-account/">delete your account</a> page walks through both routes.</p>
       <p>Two things survive that deletion, and it is worth being straight about them:</p>
       <ul>
         <li><strong>Messages you sent to other people remain in their conversations.</strong> Your side of someone else's chat history cannot be removed without deleting theirs too.</li>
