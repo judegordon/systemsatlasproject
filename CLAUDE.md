@@ -66,8 +66,8 @@ conflate them in copy or in structure.
     site/assets/    icons, fonts, app icons
     dist/           build output — gitignored, never edit by hand
 
-Hand-written: homepage, 404, the four tool pages and their privacy/support/
-terms pages, the Tools index, the contribute page.
+Hand-written: homepage, 404, the method page, the four tool pages and their
+privacy/support/terms pages, the Tools index, the contribute page.
 
 Generated from `atlas/`: every node page, the trees, diagnostics pages, and
 the completeness figures on the homepage.
