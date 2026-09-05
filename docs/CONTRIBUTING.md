@@ -54,5 +54,5 @@ credit record.
 
 ## Getting in touch
 
-hello@systemsatlasproject.com — particularly for anything larger than a pull
+inbox@systemsatlasproject.com — particularly for anything larger than a pull
 request, including working on this in a sustained way.
