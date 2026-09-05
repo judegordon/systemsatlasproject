@@ -18,9 +18,11 @@
        verbatim in the first line.
 
   The authored file names /shutoku/account-deletion as the target URL and the
-  Data safety form may already hold it. That path now 301s here — see
-  site/_redirects. If the form is updated to point straight at this URL, the
-  redirect can go; until then it is what keeps criterion 1 true.
+  Data safety form may already hold it. This page now lives at
+  /tools/shutoku/delete-account/, so that every tool names the page the same
+  way. Both the old top-level path and /tools/shutoku/account-deletion 301
+  here — see site/_redirects. If the form is updated to point straight at this
+  URL, the first of those can go; until then it is what keeps criterion 1 true.
 
   The email route is what lets this satisfy the requirement without building a
   web service: Google accepts a link, an address, or a form. That means someone
@@ -46,13 +48,13 @@
 <title>Delete your Shutoku account — Shutoku</title>
 <meta name="description" content="How to delete your Shutoku account and everything stored with it — in the app, or by email.">
 <meta name="theme-color" content="#101820">
-<link rel="canonical" href="https://systemsatlasproject.com/tools/shutoku/account-deletion/">
+<link rel="canonical" href="https://systemsatlasproject.com/tools/shutoku/delete-account/">
 <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Delete your Shutoku account — Shutoku">
 <meta property="og:description" content="How to delete your Shutoku account and everything stored with it — in the app, or by email.">
-<meta property="og:url" content="https://systemsatlasproject.com/tools/shutoku/account-deletion/">
+<meta property="og:url" content="https://systemsatlasproject.com/tools/shutoku/delete-account/">
 <meta property="og:image" content="https://systemsatlasproject.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">

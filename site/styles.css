@@ -949,26 +949,6 @@ a.tool:hover .tool__link { color: var(--night); text-decoration: underline; text
 .constraints strong { font-weight: 700; display: block; }
 .constraints span { color: var(--night-2); font-size: 17px; }
 
-/* Sibling tools ----------------------------------------------------------- */
-
-.siblings { margin-top: var(--s6); display: grid; gap: var(--s3); grid-template-columns: 1fr; }
-
-@media (min-width: 44rem) { .siblings { grid-template-columns: repeat(3, 1fr); } }
-
-.sibling {
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
-  padding: var(--s3);
-  border: 1px solid var(--rule-light);
-  text-decoration: none;
-}
-
-.sibling:hover { border-color: var(--structure); }
-.sibling img { width: 36px; height: 36px; border-radius: 9px; flex: none; }
-.sibling__name { font-family: var(--display); font-size: 18px; font-weight: 600; }
-.sibling__gloss { display: block; font-size: 14px; color: var(--structure-3); }
-
 /* App Store action -------------------------------------------------------- */
 
 .store {
